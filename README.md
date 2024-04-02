@@ -3,6 +3,7 @@
 ### [Paper](https://arxiv.org/abs/2312.09008) / [Project Page](https://jiwoogit.github.io/StyleID_site/)
 ![imgs](asset/imgs.png)
 
+
 ## Usage
 
 **To run our code, please follow these steps:**
@@ -13,6 +14,8 @@
 
 It may require a single GPU with more than 20GB of memory.
 I tested the code in the [pytorch/pytorch:1.8.1-cuda11.1-cudnn8-devel](https://hub.docker.com/layers/pytorch/pytorch/1.8.1-cuda11.1-cudnn8-devel/images/sha256-024af183411f136373a83f9a0e5d1a02fb11acb1b52fdcf4d73601912d0f09b1) Docker image.
+
+#### ** You can also refer to "diffusers_implementation/" for StyleID implementation based on diffusers library. **
 
 ## Setup
 
