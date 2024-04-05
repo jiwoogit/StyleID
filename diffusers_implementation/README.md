@@ -1,4 +1,4 @@
-# [CVPR 2024]  Diffuser implementation of "Style Injection in Diffusion: A Training-free Approach for Adapting Large-scale Diffusion Models for Style Transfer"
+# [CVPR 2024 Highlight]  Diffuser implementation of "Style Injection in Diffusion: A Training-free Approach for Adapting Large-scale Diffusion Models for Style Transfer"
 
  
 ### [Paper](https://arxiv.org/abs/2312.09008) / [Project Page](https://jiwoogit.github.io/StyleID_site/)
