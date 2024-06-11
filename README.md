@@ -1,6 +1,6 @@
 # [CVPR 2024 Highlight] Style Injection in Diffusion: A Training-free Approach for Adapting Large-scale Diffusion Models for Style Transfer
 
-### [Paper](https://arxiv.org/abs/2312.09008) / [Project Page](https://jiwoogit.github.io/StyleID_site/)
+### [Paper](https://openaccess.thecvf.com/content/CVPR2024/html/Chung_Style_Injection_in_Diffusion_A_Training-free_Approach_for_Adapting_Large-scale_CVPR_2024_paper.html) / [Arxiv](https://arxiv.org/abs/2312.09008) / [Project Page](https://jiwoogit.github.io/StyleID_site/)
 ![imgs](asset/imgs.png)
 
 
@@ -101,10 +101,12 @@ Also, we additionally provide the style and content images for qualitative compa
 If you find our work useful, please consider citing and star:
 ```BibTeX
 
-@article{chung2023style,
-  title={Style Injection in Diffusion: A Training-free Approach for Adapting Large-scale Diffusion Models for Style Transfer},
-  author={Chung, Jiwoo and Hyun, Sangeek and Heo, Jae-Pil},
-  journal={arXiv preprint arXiv:2312.09008},
-  year={2023}
+@InProceedings{Chung_2024_CVPR,
+    author    = {Chung, Jiwoo and Hyun, Sangeek and Heo, Jae-Pil},
+    title     = {Style Injection in Diffusion: A Training-free Approach for Adapting Large-scale Diffusion Models for Style Transfer},
+    booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+    month     = {June},
+    year      = {2024},
+    pages     = {8795-8805}
 }
 ```
