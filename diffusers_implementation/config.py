@@ -13,7 +13,7 @@ def get_args():
     
     # hyperparameters of diffusion model
     parse.add_argument('--ddim_steps', type=int, default=20)
-    parse.add_argument('--sd_version', type=float, choices=[1.4, 1.5, 2.1], default=2.1)
+    parse.add_argument('--sd_version', type=str, choices=["1.5", "2.0", "2.1-base", "2.1"], default="2.1-base")
     
     # path of content and style iamges
     parse.add_argument('--cnt_fn', type=str, required=True)

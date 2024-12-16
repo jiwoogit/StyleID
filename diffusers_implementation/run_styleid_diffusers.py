@@ -7,10 +7,6 @@ from utils import * # image save utils
 from stable_diffusion import load_stable_diffusion, encode_latent, decode_latent, get_text_embedding, get_unet_layers, attention_op  # load SD
 import copy
 
-# For visualizing features
-from sklearn.cluster import KMeans
-from sklearn.decomposition import PCA
-
 import cv2
 from tqdm import tqdm
 
@@ -20,7 +16,7 @@ from config import get_args
 class style_transfer_module():
            
     def __init__(self,
-        unet, vae, text_encoder, tokenizer, scheduler, style_transfer_params = None,
+        unet, vae, text_encoder, tokenizer, scheduler, cfg, style_transfer_params = None,
     ):  
         
         style_transfer_params_default = {
@@ -37,6 +33,7 @@ class style_transfer_module():
         self.text_encoder = text_encoder
         self.tokenizer = tokenizer
         self.scheduler = scheduler
+        self.cfg = cfg
 
         self.attn_features = {} # where to save key value (attention block feature)
         self.attn_features_modify = {} # where to save key value to modify (attention block feature)
@@ -132,6 +129,7 @@ class style_transfer_module():
         # Reversed timesteps <<<<<<<<<<<<<<<<<<<<
         timesteps = reversed(self.scheduler.timesteps)
         num_inference_steps = len(self.scheduler.timesteps)
+        cur_latent = input.clone()
 
         with torch.no_grad():
             for i in tqdm(range(0, num_inference_steps)):
@@ -143,33 +141,35 @@ class style_transfer_module():
                 # For text condition on stable diffusion
                 if 'encoder_hidden_states' in denoise_kwargs.keys():
                     bs = denoise_kwargs['encoder_hidden_states'].shape[0]
-                    input = torch.cat([input] * bs)
+                    cur_latent = torch.cat([cur_latent] * bs)
 
                 # Predict the noise residual
-                noisy_residual = self.unet(input, t.to(input.device), **denoise_kwargs).sample
-
-                noise_pred = noisy_residual
+                noise_pred = self.unet(cur_latent, t.to(cur_latent.device), **denoise_kwargs).sample
 
                 # For text condition on stable diffusion
-                if noisy_residual.shape[0] == 2:
+                if noise_pred.shape[0] == 2:
                     # perform guidance
-                    noise_pred_text, noise_pred_uncond = noisy_residual.chunk(2)
-                    noisy_residual = noise_pred_uncond + guidance_scale * (noise_pred_text - noise_pred_uncond)
-                    input, _ = input.chunk(2)
+                    noise_pred_text, noise_pred_uncond = noise_pred.chunk(2)
+                    noise_pred = noise_pred_uncond + guidance_scale * (noise_pred_text - noise_pred_uncond)
+                    cur_latent, _ = cur_latent.chunk(2)
 
                 current_t = max(0, t.item() - (1000//num_inference_steps)) #t
                 next_t = t # min(999, t.item() + (1000//num_inference_steps)) # t+1
                 alpha_t = self.scheduler.alphas_cumprod[current_t]
                 alpha_t_next = self.scheduler.alphas_cumprod[next_t]
 
-                latents = input
-                # Inverted update step (re-arranging the update step to get x(t) (new latents) as a function of x(t-1) (current latents)
-                latents = (latents - (1-alpha_t).sqrt()*noise_pred)*(alpha_t_next.sqrt()/alpha_t.sqrt()) + (1-alpha_t_next).sqrt()*noise_pred
+                if self.cfg.sd_version == "2.1":
+                    beta_t = 1 - alpha_t
+                    pred_original_sample = alpha_t.sqrt() * cur_latent - beta_t.sqrt() * noise_pred
+                    pred_epsilon = alpha_t.sqrt() * noise_pred + beta_t.sqrt() * cur_latent
+                    pred_sample_direction = (1 - alpha_t_next).sqrt() * pred_epsilon
+                    cur_latent = alpha_t_next.sqrt() * pred_original_sample + pred_sample_direction
+                else:
+                    # Inverted update step (re-arranging the update step to get x(t) (new latents) as a function of x(t-1) (current latents)
+                    cur_latent = (cur_latent - (1-alpha_t).sqrt()*noise_pred)*(alpha_t_next.sqrt()/alpha_t.sqrt()) + (1-alpha_t_next).sqrt()*noise_pred
                 
-                input = latents
-                
-                pred_latents.append(latents)
-                pred_images.append(decode_latent(latents, **decode_kwargs))
+                pred_latents.append(cur_latent)
+                pred_images.append(decode_latent(cur_latent, **decode_kwargs))
                 
         return pred_images, pred_latents
         
@@ -239,13 +239,13 @@ if __name__ == "__main__":
     }
     
     # Get SD modules
-    vae, tokenizer, text_encoder, unet, scheduler = load_stable_diffusion(sd_version=str(cfg.sd_version), precision_t=dtype)
+    vae, tokenizer, text_encoder, unet, scheduler = load_stable_diffusion(sd_version=cfg.sd_version, precision_t=dtype)
     scheduler.set_timesteps(ddim_steps)
     sample_size = unet.config.sample_size
     
 
     # Init style transfer module
-    unet_wrapper = style_transfer_module(unet, vae, text_encoder, tokenizer, scheduler, style_transfer_params=style_transfer_params)
+    unet_wrapper = style_transfer_module(unet, vae, text_encoder, tokenizer, scheduler, cfg, style_transfer_params=style_transfer_params)
     
     
     # Get style image tokens
@@ -273,12 +273,6 @@ if __name__ == "__main__":
     # save key value from style image
     style_features = copy.deepcopy(unet_wrapper.attn_features)
     # =============================================
-
-
-
-
-
-
     # Get content image tokens
     denoise_kwargs = unet_wrapper.get_text_condition(content_text)
     
@@ -304,10 +298,6 @@ if __name__ == "__main__":
     # save res feature from content image
     content_features = copy.deepcopy(unet_wrapper.attn_features)
     # =============================================
-    
-    
-    
-    
     # ================= IMPORTANT =================
     # Set modify features
     for layer_name in style_features.keys():

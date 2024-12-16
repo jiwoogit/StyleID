@@ -9,6 +9,8 @@ from diffusers import LMSDiscreteScheduler, DDIMScheduler
 # From "https://huggingface.co/blog/stable_diffusion"
 def load_stable_diffusion(sd_version='2.1', precision_t=torch.float32, device="cuda"):
     if sd_version == '2.1':
+        model_key = "stabilityai/stable-diffusion-2-1"
+    elif sd_version == '2.1-base':
         model_key = "stabilityai/stable-diffusion-2-1-base"
     elif sd_version == '2.0':
         model_key = "stabilityai/stable-diffusion-2-base"
