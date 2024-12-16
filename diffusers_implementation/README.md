@@ -7,6 +7,15 @@
 This is implementation of StyleID based on [diffusers](https://github.com/huggingface/diffusers) library. 
 You may refer to the original implementation for obtaining quantitative metrics reported in the paper.
 
+### Update: Support for Stable Diffusion 2.1 (2024-12-14)
+
+Thanks to @LiManyuan663, the code now supports running with `sd_version=2.1`. You can use the updated script as shown below:
+
+```bash
+python run_styleid_diffusers.py --cnt_fn data/cnt.png --sty_fn data/sty.png --sd_version 2.1-base
+python run_styleid_diffusers.py --cnt_fn data/cnt.png --sty_fn data/sty.png --sd_version 2.1
+```
+
 ## Run StyleID
 For running StyleID, run:
 
