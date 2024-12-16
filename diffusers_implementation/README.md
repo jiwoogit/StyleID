@@ -9,7 +9,7 @@ You may refer to the original implementation for obtaining quantitative metrics 
 
 ### Update: Support for Stable Diffusion 2.1 (2024-12-14)
 
-Thanks to @LiManyuan663, the code now supports running with `sd_version=2.1`. You can use the updated script as shown below:
+Thanks to [@LiManyuan663](https://github.com/LiManyuan663) the code now supports running with `sd_version=2.1`. You can use the updated script as shown below:
 
 ```bash
 python run_styleid_diffusers.py --cnt_fn data/cnt.png --sty_fn data/sty.png --sd_version 2.1-base
